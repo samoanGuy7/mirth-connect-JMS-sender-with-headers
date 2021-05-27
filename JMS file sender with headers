@@ -1,0 +1,25 @@
+importPackage(Packages.org.apache.activemq);
+importPackage(Packages.javax.jms);
+            try {
+                var connectionFactory = new ActiveMQConnectionFactory("tcp://someActiveMQServer:61616");
+                var connection = connectionFactory.createConnection();
+                connection.start();
+
+                var session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                var destination = session.createQueue("DestinationQueue");
+                var producer = session.createProducer(destination);
+                producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+                var text = $('someJsonObject');
+                var message = session.createTextMessage(text);
+                
+                //Setting a property on the message(message is a data type in activemq, not just a string), not currently supported by mirth connect natively
+                //https://activemq.apache.org/maven/apidocs/org/apache/activemq/command/Message.html
+                message.setType("someType");
+                producer.send(message);
+
+                session.close();
+                connection.close();
+            }
+            catch (e) {
+                logger.error(e.printStackTrace());
+            }
